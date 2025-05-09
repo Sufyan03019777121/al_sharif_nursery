@@ -1,0 +1,43 @@
+# Node modules (backend and frontend)
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.bak
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build output
+build/
+dist/
+
+# Frontend build
+/frontend/build/
+/frontend/node_modules/
+
+# Admin specific
+/admin/node_modules/
+/admin/build/
+
+# Backend specific
+/backend/node_modules/
+/backend/build/
+
+# VSCode settings
+.vscode/
+
+# OS generated files (macOS, Windows, Linux)
+.DS_Store
+Thumbs.db
+
+# Npm package lock files
+package-lock.json
+yarn.lock
