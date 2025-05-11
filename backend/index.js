@@ -72,8 +72,8 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Route to get all products
-app.get('/api/products', authenticateJWT, async (req, res) => {
+// ✅ Public Route to get all products
+app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find();
     res.json(products);
@@ -82,7 +82,7 @@ app.get('/api/products', authenticateJWT, async (req, res) => {
   }
 });
 
-// Route to create a new product
+// ✅ Protected Route to create a new product
 app.post('/api/products', authenticateJWT, async (req, res) => {
   const { title, description, price, images } = req.body;
   const newProduct = new Product({ title, description, price, images });
@@ -95,7 +95,7 @@ app.post('/api/products', authenticateJWT, async (req, res) => {
   }
 });
 
-// Route to update a product
+// ✅ Protected Route to update a product
 app.put('/api/products/:id', authenticateJWT, async (req, res) => {
   const { title, description, price, images } = req.body;
   
@@ -107,7 +107,7 @@ app.put('/api/products/:id', authenticateJWT, async (req, res) => {
   }
 });
 
-// Route to delete a product
+// ✅ Protected Route to delete a product
 app.delete('/api/products/:id', authenticateJWT, async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
