@@ -1,11 +1,19 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const fs = require('fs');
 
-dotenv.config();
+// Environment Setup
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
+const envPath = path.join(__dirname, envFile);
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+} else {
+  require('dotenv').config();
+}
 
 const app = express();
 app.use(cors());
@@ -13,125 +21,119 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// ===== MongoDB Connection =====
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log('MongoDB connected');
-  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
-}).catch((err) => console.error('MongoDB connection error:', err));
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => console.log(err));
 
-// ===== User Schema & Model =====
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-}, { timestamps: true });
-
-// Specify custom collection name 'alsharif' for User
-const User = mongoose.model('User', userSchema, 'alsharif');
-
-// ===== Product Schema & Model =====
+// Define the Product schema
 const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  description: String,
+  description: { type: String, required: true },
   price: { type: Number, required: true },
-  images: [String], // Multiple image URLs
-}, { timestamps: true });
-
-// Specify custom collection name 'alsharif' for Product
-const Product = mongoose.model('Product', productSchema, 'alsharif');
-
-// ===== Routes =====
-
-// --- Auth Routes ---
-app.post('/api/auth/register', async (req, res) => {
-  const { name, email, password } = req.body;
-  const exist = await User.findOne({ email });
-  if (exist) return res.status(400).json({ message: 'Email already exists' });
-
-  const hashed = await bcrypt.hash(password, 10);
-  const user = new User({ name, email, password: hashed });
-  await user.save();
-  res.status(201).json({ message: 'User registered successfully' });
+  images: [String],
 });
 
-app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ message: 'User not found' });
+// Define the Product model
+const Product = mongoose.model('Product', productSchema);
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+// Define the Admin schema
+const adminSchema = new mongoose.Schema({
+  password: { type: String, required: true }
+});
 
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+// Define the Admin model
+const Admin = mongoose.model('Admin', adminSchema);
 
-  res.json({
-    token,
-    user: { id: user._id, name: user.name, email: user.email }
+// Middleware to authenticate using JWT
+const authenticateJWT = (req, res, next) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) return res.sendStatus(403);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
   });
-});
+};
 
-// Password change route
-app.post('/api/auth/change-password', async (req, res) => {
-  const { userId, currentPassword, newPassword } = req.body;
-
-  const user = await User.findById(userId);
-  if (!user) return res.status(404).json({ message: 'User not found' });
-
-  const isMatch = await bcrypt.compare(currentPassword, user.password);
-  if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
-
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-  user.password = hashedPassword;
-  await user.save();
-
-  res.status(200).json({ message: 'Password changed successfully' });
-});
-
-// --- Product Routes ---
-
-// ➕ Add product
-app.post('/api/products', async (req, res) => {
-  const { title, description, price, images } = req.body;
-  const newProduct = new Product({ title, description, price, images });
-  await newProduct.save();
-  res.status(201).json({ message: 'Product added', product: newProduct });
-});
-
-// 📥 Get all products
-app.get('/api/products', async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
-});
-
-// 📥 Get single product by ID ✅
-app.get('/api/products/:id', async (req, res) => {
+// Route for login to Admin Panel
+app.post('/api/auth/login', async (req, res) => {
+  const { password } = req.body;
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ message: 'Product not found' });
-    res.json(product);
+    const admin = await Admin.findOne({});
+    if (admin && bcrypt.compareSync(password, admin.password)) {
+      const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      return res.json({ token });
+    }
+    res.status(400).json({ message: 'Incorrect password' });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
-// ✏️ Update product
-app.put('/api/products/:id', async (req, res) => {
-  const { id } = req.params;
-  const updated = await Product.findByIdAndUpdate(id, req.body, { new: true });
-  res.json({ message: 'Product updated', product: updated });
+// Route to get all products
+app.get('/api/products', authenticateJWT, async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching products' });
+  }
 });
 
-// ❌ Delete product
-app.delete('/api/products/:id', async (req, res) => {
-  const { id } = req.params;
-  await Product.findByIdAndDelete(id);
-  res.json({ message: 'Product deleted' });
+// Route to create a new product
+app.post('/api/products', authenticateJWT, async (req, res) => {
+  const { title, description, price, images } = req.body;
+  const newProduct = new Product({ title, description, price, images });
+  
+  try {
+    await newProduct.save();
+    res.status(201).json(newProduct);
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating product' });
+  }
 });
 
-// Default Route
-app.get('/', (req, res) => {
-  res.send('API is running...');
+// Route to update a product
+app.put('/api/products/:id', authenticateJWT, async (req, res) => {
+  const { title, description, price, images } = req.body;
+  
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, { title, description, price, images }, { new: true });
+    res.json(updatedProduct);
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating product' });
+  }
+});
+
+// Route to delete a product
+app.delete('/api/products/:id', authenticateJWT, async (req, res) => {
+  try {
+    await Product.findByIdAndDelete(req.params.id);
+    res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting product' });
+  }
+});
+
+// Initialize the Admin password (if not already set)
+const initAdminPassword = async () => {
+  try {
+    const existingAdmin = await Admin.findOne({});
+    if (!existingAdmin) {
+      const hashedPassword = bcrypt.hashSync('admin123', 10);
+      const admin = new Admin({ password: hashedPassword });
+      await admin.save();
+      console.log('Admin password initialized');
+    }
+  } catch (err) {
+    console.log('Error initializing admin password', err);
+  }
+};
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+  initAdminPassword(); // Initialize admin password when the server starts
 });
