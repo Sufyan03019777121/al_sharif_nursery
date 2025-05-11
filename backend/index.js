@@ -11,13 +11,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const PORT = process.env.PORT || 5000;
+
 // ===== MongoDB Connection =====
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => {
   console.log('MongoDB connected');
-  app.listen(5000, () => console.log('Server running on http://localhost:5000'));
+  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 }).catch((err) => console.error('MongoDB connection error:', err));
 
 // ===== User Schema & Model =====
@@ -27,7 +29,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
 }, { timestamps: true });
 
-const User = mongoose.model('User', userSchema);
+// Specify custom collection name 'alsharif' for User
+const User = mongoose.model('User', userSchema, 'alsharif');
 
 // ===== Product Schema & Model =====
 const productSchema = new mongoose.Schema({
@@ -37,7 +40,8 @@ const productSchema = new mongoose.Schema({
   images: [String], // Multiple image URLs
 }, { timestamps: true });
 
-const Product = mongoose.model('Product', productSchema);
+// Specify custom collection name 'alsharif' for Product
+const Product = mongoose.model('Product', productSchema, 'alsharif');
 
 // ===== Routes =====
 
@@ -102,7 +106,7 @@ app.get('/api/products', async (req, res) => {
   res.json(products);
 });
 
-// 📥 Get single product by ID ✅ (ADDED THIS!)
+// 📥 Get single product by ID ✅
 app.get('/api/products/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
