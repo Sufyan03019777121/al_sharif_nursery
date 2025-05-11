@@ -6,14 +6,8 @@ const jwt = require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 
-// Environment Setup
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local';
-const envPath = path.join(__dirname, envFile);
-if (fs.existsSync(envPath)) {
-  require('dotenv').config({ path: envPath });
-} else {
-  require('dotenv').config();
-}
+// ✅ Load environment variables
+require('dotenv').config(); // Always load from .env
 
 const app = express();
 app.use(cors());
@@ -21,31 +15,27 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
-  .catch((err) => console.log(err));
+// ✅ MongoDB connection
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch((err) => console.log('❌ MongoDB connection error:', err));
 
-// Define the Product schema
+// ✅ Product Schema & Model
 const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
   images: [String],
 });
-
-// Define the Product model
 const Product = mongoose.model('Product', productSchema);
 
-// Define the Admin schema
+// ✅ Admin Schema & Model
 const adminSchema = new mongoose.Schema({
   password: { type: String, required: true }
 });
-
-// Define the Admin model
 const Admin = mongoose.model('Admin', adminSchema);
 
-// Middleware to authenticate using JWT
+// ✅ JWT Middleware
 const authenticateJWT = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.sendStatus(403);
@@ -57,7 +47,7 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
-// Route for login to Admin Panel
+// ✅ Admin login route
 app.post('/api/auth/login', async (req, res) => {
   const { password } = req.body;
   try {
@@ -72,7 +62,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// ✅ Public Route to get all products
+// ✅ Public - Get all products
 app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find();
@@ -82,11 +72,11 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// ✅ Protected Route to create a new product
+// ✅ Protected - Create product
 app.post('/api/products', authenticateJWT, async (req, res) => {
   const { title, description, price, images } = req.body;
   const newProduct = new Product({ title, description, price, images });
-  
+
   try {
     await newProduct.save();
     res.status(201).json(newProduct);
@@ -95,19 +85,23 @@ app.post('/api/products', authenticateJWT, async (req, res) => {
   }
 });
 
-// ✅ Protected Route to update a product
+// ✅ Protected - Update product
 app.put('/api/products/:id', authenticateJWT, async (req, res) => {
   const { title, description, price, images } = req.body;
-  
+
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, { title, description, price, images }, { new: true });
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { title, description, price, images },
+      { new: true }
+    );
     res.json(updatedProduct);
   } catch (err) {
     res.status(500).json({ message: 'Error updating product' });
   }
 });
 
-// ✅ Protected Route to delete a product
+// ✅ Protected - Delete product
 app.delete('/api/products/:id', authenticateJWT, async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
@@ -117,7 +111,7 @@ app.delete('/api/products/:id', authenticateJWT, async (req, res) => {
   }
 });
 
-// Initialize the Admin password (if not already set)
+// ✅ Initialize Admin Password
 const initAdminPassword = async () => {
   try {
     const existingAdmin = await Admin.findOne({});
@@ -125,15 +119,15 @@ const initAdminPassword = async () => {
       const hashedPassword = bcrypt.hashSync('admin123', 10);
       const admin = new Admin({ password: hashedPassword });
       await admin.save();
-      console.log('Admin password initialized');
+      console.log('✅ Admin password initialized (default: admin123)');
     }
   } catch (err) {
-    console.log('Error initializing admin password', err);
+    console.log('❌ Error initializing admin password:', err);
   }
 };
 
-// Start the server
+// ✅ Start server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  initAdminPassword(); // Initialize admin password when the server starts
+  console.log(`🚀 Server is running on port ${PORT}`);
+  initAdminPassword();
 });

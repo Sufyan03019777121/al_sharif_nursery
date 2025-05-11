@@ -20,11 +20,7 @@ function AdminPanel() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // Use token from localStorage
-        },
-      });
+      const res = await axios.get('http://localhost:5000/api/products');
       setProducts(res.data);
     } catch (err) {
       console.error(err);
@@ -45,13 +41,9 @@ function AdminPanel() {
   const handleAddOrUpdateProduct = async () => {
     try {
       if (editProductId) {
-        await axios.put(`http://localhost:5000/api/products/${editProductId}`, newProduct, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        });
+        await axios.put(`http://localhost:5000/api/products/${editProductId}`, newProduct);
       } else {
-        await axios.post('http://localhost:5000/api/products', newProduct, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        });
+        await axios.post('http://localhost:5000/api/products', newProduct);
       }
       setNewProduct({ title: '', description: '', price: '', images: ['', ''] });
       setEditProductId(null);
@@ -68,22 +60,19 @@ function AdminPanel() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-      });
+      await axios.delete(`http://localhost:5000/api/products/${id}`);
       fetchProducts();
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleLogin = async () => {
-    try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { password: loginPassword });
-      localStorage.setItem('token', res.data.token);
+  const handleLogin = () => {
+    const adminPassword = process.env.REACT_APP_ADMIN_PASSWORD;
+    if (loginPassword === adminPassword) {
       setIsLoggedIn(true);
       setLoginError('');
-    } catch (err) {
+    } else {
       setLoginError('Incorrect password');
     }
   };
@@ -118,7 +107,17 @@ function AdminPanel() {
         <>
           <Row className="align-items-center justify-content-between mb-3">
             <Col><h2>DarzNursery Admin Panel</h2></Col>
-            <Col className="text-end"><Button variant="outline-danger" onClick={() => setIsLoggedIn(false)}>Logout</Button></Col>
+            <Col className="text-end">
+              <Button
+                variant="outline-danger"
+                onClick={() => {
+                  setIsLoggedIn(false);
+                  setLoginPassword('');
+                }}
+              >
+                Logout
+              </Button>
+            </Col>
           </Row>
 
           <Tabs defaultActiveKey="products" className="mb-3">
