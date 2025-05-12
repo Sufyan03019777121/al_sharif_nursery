@@ -115,6 +115,22 @@ const AdminPanel = () => {
     product.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleAddPhoneNumber = async () => {
+    if (!phoneNumberToEdit?.phoneNumber) return;
+
+    try {
+      await axios.post('https://al-sharif-nursery.onrender.com/api/phoneNumbers', {
+        phoneNumber: phoneNumberToEdit.phoneNumber,
+        additionalData,
+      });
+      setPhoneNumberToEdit(null);
+      setAdditionalData('');
+      fetchPhoneNumbers(); // Refresh list
+    } catch (error) {
+      console.error('Error adding phone number:', error);
+    }
+  };
+
   return (
     <Container className="mt-4">
       <Row className="align-items-center justify-content-between mb-3">
@@ -242,6 +258,41 @@ const AdminPanel = () => {
             <Col md={12}>
               <h4>Phone Numbers</h4>
               {warningMessage && <p className="text-danger">{warningMessage}</p>}
+
+              <Form className="mb-4" onSubmit={(e) => {
+                e.preventDefault();
+                handleAddPhoneNumber();
+              }}>
+                <Form.Group controlId="formPhoneNumber">
+                  <Form.Label>New Phone Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter phone number"
+                    value={phoneNumberToEdit?.phoneNumber || ''}
+                    onChange={(e) =>
+                      setPhoneNumberToEdit({
+                        ...phoneNumberToEdit,
+                        phoneNumber: e.target.value
+                      })
+                    }
+                  />
+                </Form.Group>
+
+                <Form.Group controlId="formAdditionalData">
+                  <Form.Label>Additional Data</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter additional info (optional)"
+                    value={additionalData}
+                    onChange={(e) => setAdditionalData(e.target.value)}
+                  />
+                </Form.Group>
+
+                <Button variant="primary" type="submit" className="mt-2">
+                  Add Phone Number
+                </Button>
+              </Form>
+
               <Table striped bordered hover>
                 <thead>
                   <tr>
@@ -276,7 +327,9 @@ const AdminPanel = () => {
                       <Form.Control
                         type="text"
                         value={phoneNumberToEdit?.phoneNumber || ''}
-                        readOnly
+                        onChange={(e) =>
+                          setPhoneNumberToEdit({ ...phoneNumberToEdit, phoneNumber: e.target.value })
+                        }
                       />
                     </Form.Group>
                     <Form.Group>
@@ -287,12 +340,9 @@ const AdminPanel = () => {
                         onChange={(e) => setAdditionalData(e.target.value)}
                       />
                     </Form.Group>
+                    <Button className="mt-2" onClick={handleSavePhoneNumber}>Save</Button>
                   </Form>
                 </Modal.Body>
-                <Modal.Footer>
-                  <Button variant="secondary" onClick={() => setShowEditModal(false)}>Close</Button>
-                  <Button variant="primary" onClick={handleSavePhoneNumber}>Save Changes</Button>
-                </Modal.Footer>
               </Modal>
             </Col>
           </Row>
