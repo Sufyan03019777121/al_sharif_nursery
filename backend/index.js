@@ -14,6 +14,14 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.log('❌ MongoDB connection error:', err));
 
+// ✅ PhoneNumber Schema & Model
+const phoneNumberSchema = new mongoose.Schema({
+  phoneNumber: { type: String, required: true },
+  additionalData: { type: String }, // for storing any extra information if needed
+}, { timestamps: true });
+
+const PhoneNumber = mongoose.model('PhoneNumber', phoneNumberSchema);
+
 // ✅ Product Schema & Model
 const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -21,6 +29,7 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   images: [String],
 });
+
 const Product = mongoose.model('Product', productSchema);
 
 // ✅ Public - Get all products
@@ -82,6 +91,53 @@ app.delete('/api/products/:id', async (req, res) => {
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ message: 'Error deleting product' });
+  }
+});
+
+// ✅ PhoneNumbers Routes
+
+// POST route to add phone number
+app.post('/api/phoneNumbers', async (req, res) => {
+  const { phoneNumber } = req.body;
+
+  // Check if the database has 110 entries
+  const count = await PhoneNumber.countDocuments();
+  if (count >= 110) {
+    return res.status(400).json({ message: 'Cannot add more numbers, please delete an existing one.' });
+  }
+
+  try {
+    const newPhoneNumber = new PhoneNumber({ phoneNumber });
+    await newPhoneNumber.save();
+    res.status(201).json(newPhoneNumber);
+  } catch (error) {
+    res.status(500).json({ message: 'Error saving phone number', error });
+  }
+});
+
+// PUT route to edit phone number (and additional data)
+app.put('/api/phoneNumbers/:id', async (req, res) => {
+  const { phoneNumber, additionalData } = req.body;
+  
+  try {
+    const updatedPhoneNumber = await PhoneNumber.findByIdAndUpdate(
+      req.params.id, 
+      { phoneNumber, additionalData },
+      { new: true }
+    );
+    res.status(200).json(updatedPhoneNumber);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating phone number', error });
+  }
+});
+
+// DELETE route to delete phone number
+app.delete('/api/phoneNumbers/:id', async (req, res) => {
+  try {
+    await PhoneNumber.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Phone number deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting phone number', error });
   }
 });
 
