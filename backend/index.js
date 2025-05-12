@@ -33,6 +33,19 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
+// ✅ Public - Get single product by ID
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching product' });
+  }
+});
+
 // ✅ Public - Create product
 app.post('/api/products', async (req, res) => {
   const { title, description, price, images } = req.body;

@@ -18,7 +18,7 @@ function AdminPanel() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      const res = await axios.get('https://al-sharif-nursery.onrender.com/api/products');
       setProducts(res.data);
     } catch (err) {
       console.error(err);
@@ -39,9 +39,9 @@ function AdminPanel() {
   const handleAddOrUpdateProduct = async () => {
     try {
       if (editProductId) {
-        await axios.put(`http://localhost:5000/api/products/${editProductId}`, newProduct);
+        await axios.put(`https://al-sharif-nursery.onrender.com/api/products/${editProductId}`, newProduct);
       } else {
-        await axios.post('http://localhost:5000/api/products', newProduct);
+        await axios.post('https://al-sharif-nursery.onrender.com/api/products', newProduct);
       }
       setNewProduct({ title: '', description: '', price: '', images: ['', ''] });
       setEditProductId(null);
@@ -58,7 +58,7 @@ function AdminPanel() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      await axios.delete(`https://al-sharif-nursery.onrender.com/api/products/${id}`);
       fetchProducts();
     } catch (err) {
       console.error(err);
