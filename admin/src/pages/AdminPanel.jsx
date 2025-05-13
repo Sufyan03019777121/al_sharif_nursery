@@ -159,6 +159,7 @@ const AdminPanel = () => {
                     as="textarea"
                     rows={3}
                     name="description"
+                    className='text-truncate h-'
                     value={newProduct.description}
                     onChange={handleInputChange}
                   />
@@ -235,7 +236,10 @@ const AdminPanel = () => {
                         ))}
                       </td>
                       <td>{product.title}</td>
-                      <td>{product.description}</td>
+                      <td 
+                      className='text-truncate'
+                      style={{maxWidth: '100px'}}
+                      >{product.description}</td>
                       <td>{product.price}</td>
                       <td>
                         <Button variant="warning" size="sm" onClick={() => handleEditProduct(product)} className="me-2">
@@ -307,8 +311,8 @@ const AdminPanel = () => {
                       <td>{phoneNumber.phoneNumber}</td>
                       <td>{phoneNumber.additionalData}</td>
                       <td>
-                        <Button variant="info" onClick={() => handleEditPhoneNumber(phoneNumber)}>Edit</Button>{' '}
-                        <Button variant="danger" onClick={() => handleDeletePhoneNumber(phoneNumber._id)}>Delete</Button>
+                        <Button variant="info p-1 py-0" onClick={() => handleEditPhoneNumber(phoneNumber)}>Edit</Button>{' '}
+                        <Button variant="danger p-1 py-0" onClick={() => handleDeletePhoneNumber(phoneNumber._id)}>Delete</Button>
                       </td>
                     </tr>
                   ))}
