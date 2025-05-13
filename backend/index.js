@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGO_URI)
 // ✅ PhoneNumber Schema & Model
 const phoneNumberSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
-  additionalData: { type: String }, // for storing any extra information if needed
+  additionalData: { type: String },
 }, { timestamps: true });
 
 const PhoneNumber = mongoose.model('PhoneNumber', phoneNumberSchema);
@@ -32,7 +32,9 @@ const productSchema = new mongoose.Schema({
 
 const Product = mongoose.model('Product', productSchema);
 
-// ✅ Public - Get all products
+// ✅ Products Routes
+
+// Get all products
 app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find();
@@ -42,7 +44,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// ✅ Public - Get single product by ID
+// Get single product by ID
 app.get('/api/products/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -55,7 +57,7 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-// ✅ Public - Create product
+// Create product
 app.post('/api/products', async (req, res) => {
   const { title, description, price, images } = req.body;
   const newProduct = new Product({ title, description, price, images });
@@ -68,7 +70,7 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
-// ✅ Public - Update product
+// Update product
 app.put('/api/products/:id', async (req, res) => {
   const { title, description, price, images } = req.body;
 
@@ -84,7 +86,7 @@ app.put('/api/products/:id', async (req, res) => {
   }
 });
 
-// ✅ Public - Delete product
+// Delete product
 app.delete('/api/products/:id', async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
@@ -96,11 +98,33 @@ app.delete('/api/products/:id', async (req, res) => {
 
 // ✅ PhoneNumbers Routes
 
-// POST route to add phone number
+// GET - All phone numbers
+app.get('/api/phoneNumbers', async (req, res) => {
+  try {
+    const phoneNumbers = await PhoneNumber.find();
+    res.status(200).json(phoneNumbers);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching phone numbers', error });
+  }
+});
+
+// GET - Single phone number by ID
+app.get('/api/phoneNumbers/:id', async (req, res) => {
+  try {
+    const phoneNumber = await PhoneNumber.findById(req.params.id);
+    if (!phoneNumber) {
+      return res.status(404).json({ message: 'Phone number not found' });
+    }
+    res.status(200).json(phoneNumber);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching phone number', error });
+  }
+});
+
+// POST - Add phone number
 app.post('/api/phoneNumbers', async (req, res) => {
   const { phoneNumber } = req.body;
 
-  // Check if the database has 110 entries
   const count = await PhoneNumber.countDocuments();
   if (count >= 110) {
     return res.status(400).json({ message: 'Cannot add more numbers, please delete an existing one.' });
@@ -115,13 +139,13 @@ app.post('/api/phoneNumbers', async (req, res) => {
   }
 });
 
-// PUT route to edit phone number (and additional data)
+// PUT - Update phone number
 app.put('/api/phoneNumbers/:id', async (req, res) => {
   const { phoneNumber, additionalData } = req.body;
-  
+
   try {
     const updatedPhoneNumber = await PhoneNumber.findByIdAndUpdate(
-      req.params.id, 
+      req.params.id,
       { phoneNumber, additionalData },
       { new: true }
     );
@@ -131,7 +155,7 @@ app.put('/api/phoneNumbers/:id', async (req, res) => {
   }
 });
 
-// DELETE route to delete phone number
+// DELETE - Delete phone number
 app.delete('/api/phoneNumbers/:id', async (req, res) => {
   try {
     await PhoneNumber.findByIdAndDelete(req.params.id);
