@@ -1,4 +1,3 @@
-
 // ✅ routes/authRoutes.js
 const express = require('express');
 const bcrypt = require('bcryptjs');
@@ -37,7 +36,8 @@ router.post('/login', async (req, res) => {
 
 router.get('/users', async (req, res) => {
   try {
-    const users = await User.find({}, 'email createdAt').sort({ createdAt: -1 });
+    // ✅ _id field included
+    const users = await User.find({}, '_id email createdAt').sort({ createdAt: -1 });
     res.status(200).json(users);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch users', error: err.message });
@@ -45,4 +45,3 @@ router.get('/users', async (req, res) => {
 });
 
 module.exports = router;
-

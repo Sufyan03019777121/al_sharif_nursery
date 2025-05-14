@@ -5,7 +5,7 @@ const AdminUserList = () => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/admin/users')
+    axios.get('https://al-sharif-nursery.onrender.com/api/admin/users')
       .then(res => setUsers(res.data))
       .catch(err => console.error('Error fetching users:', err));
   }, []);
@@ -21,12 +21,18 @@ const AdminUserList = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
-            <tr key={user._id}>
-              <td>{user.email}</td>
-              <td>{new Date(user.createdAt).toLocaleString()}</td>
+          {users.length === 0 ? (
+            <tr>
+              <td colSpan="2" className="text-center">No users found</td>
             </tr>
-          ))}
+          ) : (
+            users.map(user => (
+              <tr key={user._id || 'unknown'}>
+                <td>{user.email}</td>
+                <td>{new Date(user.createdAt).toLocaleString()}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
@@ -34,3 +40,4 @@ const AdminUserList = () => {
 };
 
 export default AdminUserList;
+  
