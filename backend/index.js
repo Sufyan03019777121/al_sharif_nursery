@@ -1,28 +1,76 @@
+// ✅ IMPORTS
 const express = require('express');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
+
+// ✅ MIDDLEWARE
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 5001;
-
-// ✅ MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
+// ✅ MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
   .then(() => console.log('✅ MongoDB connected'))
-  .catch((err) => console.log('❌ MongoDB connection error:', err));
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// ✅ PhoneNumber Schema & Model
-const phoneNumberSchema = new mongoose.Schema({
-  phoneNumber: { type: String, required: true },
-  additionalData: { type: String },
+// ✅ USER SCHEMA & MODEL
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
 }, { timestamps: true });
 
-const PhoneNumber = mongoose.model('PhoneNumber', phoneNumberSchema);
+const User = mongoose.model('User', userSchema);
 
-// ✅ Product Schema & Model
+// ✅ REGISTER ROUTE
+app.post('/api/register', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const exist = await User.findOne({ email });
+    if (exist) return res.status(400).json({ message: 'Email already registered' });
+
+    const hash = await bcrypt.hash(password, 10);
+    const newUser = new User({ email, password: hash });
+    await newUser.save();
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Registration failed', error: err.message });
+  }
+});
+
+// ✅ LOGIN ROUTE
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ message: 'Invalid credentials' });
+
+    res.status(200).json({ message: 'Login successful', user: { email: user.email } });
+  } catch (err) {
+    res.status(500).json({ message: 'Login failed', error: err.message });
+  }
+});
+
+// ✅ GET ALL USERS ROUTE
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find({}, 'email createdAt').sort({ createdAt: -1 });
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch users', error: err.message });
+  }
+});
+
+// ✅ PRODUCT SCHEMA & MODEL
 const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
@@ -32,9 +80,7 @@ const productSchema = new mongoose.Schema({
 
 const Product = mongoose.model('Product', productSchema);
 
-// ✅ Products Routes
-
-// Get all products
+// ✅ PRODUCT ROUTES
 app.get('/api/products', async (req, res) => {
   try {
     const products = await Product.find();
@@ -44,24 +90,19 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-// Get single product by ID
 app.get('/api/products/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
+    if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching product' });
   }
 });
 
-// Create product
 app.post('/api/products', async (req, res) => {
   const { title, description, price, images } = req.body;
   const newProduct = new Product({ title, description, price, images });
-
   try {
     await newProduct.save();
     res.status(201).json(newProduct);
@@ -70,10 +111,8 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
-// Update product
 app.put('/api/products/:id', async (req, res) => {
   const { title, description, price, images } = req.body;
-
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
@@ -86,7 +125,6 @@ app.put('/api/products/:id', async (req, res) => {
   }
 });
 
-// Delete product
 app.delete('/api/products/:id', async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
@@ -96,9 +134,15 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
-// ✅ PhoneNumbers Routes
+// ✅ PHONE NUMBER SCHEMA & MODEL
+const phoneNumberSchema = new mongoose.Schema({
+  phoneNumber: { type: String, required: true },
+  additionalData: { type: String },
+}, { timestamps: true });
 
-// GET - All phone numbers
+const PhoneNumber = mongoose.model('PhoneNumber', phoneNumberSchema);
+
+// ✅ PHONE NUMBER ROUTES
 app.get('/api/phoneNumbers', async (req, res) => {
   try {
     const phoneNumbers = await PhoneNumber.find();
@@ -108,28 +152,22 @@ app.get('/api/phoneNumbers', async (req, res) => {
   }
 });
 
-// GET - Single phone number by ID
 app.get('/api/phoneNumbers/:id', async (req, res) => {
   try {
     const phoneNumber = await PhoneNumber.findById(req.params.id);
-    if (!phoneNumber) {
-      return res.status(404).json({ message: 'Phone number not found' });
-    }
+    if (!phoneNumber) return res.status(404).json({ message: 'Phone number not found' });
     res.status(200).json(phoneNumber);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching phone number', error });
   }
 });
 
-// POST - Add phone number
 app.post('/api/phoneNumbers', async (req, res) => {
   const { phoneNumber } = req.body;
-
   const count = await PhoneNumber.countDocuments();
   if (count >= 110) {
     return res.status(400).json({ message: 'Cannot add more numbers, please delete an existing one.' });
   }
-
   try {
     const newPhoneNumber = new PhoneNumber({ phoneNumber });
     await newPhoneNumber.save();
@@ -139,10 +177,8 @@ app.post('/api/phoneNumbers', async (req, res) => {
   }
 });
 
-// PUT - Update phone number
 app.put('/api/phoneNumbers/:id', async (req, res) => {
   const { phoneNumber, additionalData } = req.body;
-
   try {
     const updatedPhoneNumber = await PhoneNumber.findByIdAndUpdate(
       req.params.id,
@@ -155,7 +191,6 @@ app.put('/api/phoneNumbers/:id', async (req, res) => {
   }
 });
 
-// DELETE - Delete phone number
 app.delete('/api/phoneNumbers/:id', async (req, res) => {
   try {
     await PhoneNumber.findByIdAndDelete(req.params.id);
@@ -165,7 +200,5 @@ app.delete('/api/phoneNumbers/:id', async (req, res) => {
   }
 });
 
-// ✅ Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-});
+// ✅ START SERVER
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
