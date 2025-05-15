@@ -135,7 +135,7 @@ const AdminPanel = () => {
   return (
     <Container className="mt-4">
       <Row className="align-items-center justify-content-between mb-3">
-        <Col><h2>DarzNursery Admin Panel</h2></Col>
+        <Col><h2>Al Sharif Nursery Admin Panel</h2></Col>
       </Row>
 
       <Tabs defaultActiveKey="products" className="mb-3">

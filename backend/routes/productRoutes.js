@@ -1,9 +1,8 @@
-
-// ✅ routes/productRoutes.js
 const express = require('express');
 const Product = require('../models/Product');
 const router = express.Router();
 
+// Get all products
 router.get('/', async (req, res) => {
   try {
     const products = await Product.find();
@@ -13,6 +12,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get single product
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -23,10 +23,11 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Create product
 router.post('/', async (req, res) => {
   const { title, description, price, images } = req.body;
-  const newProduct = new Product({ title, description, price, images });
   try {
+    const newProduct = new Product({ title, description, price, images });
     await newProduct.save();
     res.status(201).json(newProduct);
   } catch (err) {
@@ -34,6 +35,7 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Update product
 router.put('/:id', async (req, res) => {
   const { title, description, price, images } = req.body;
   try {
@@ -48,6 +50,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// Delete product
 router.delete('/:id', async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
@@ -58,4 +61,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
-

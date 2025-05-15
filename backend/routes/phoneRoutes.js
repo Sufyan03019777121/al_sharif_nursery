@@ -1,9 +1,8 @@
-
-// ✅ routes/phoneRoutes.js
 const express = require('express');
 const PhoneNumber = require('../models/PhoneNumber');
 const router = express.Router();
 
+// Get all
 router.get('/', async (req, res) => {
   try {
     const phoneNumbers = await PhoneNumber.find();
@@ -13,6 +12,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get single
 router.get('/:id', async (req, res) => {
   try {
     const phoneNumber = await PhoneNumber.findById(req.params.id);
@@ -23,6 +23,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// Add
 router.post('/', async (req, res) => {
   const { phoneNumber } = req.body;
   const count = await PhoneNumber.countDocuments();
@@ -38,20 +39,22 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Update
 router.put('/:id', async (req, res) => {
   const { phoneNumber, additionalData } = req.body;
   try {
-    const updatedPhoneNumber = await PhoneNumber.findByIdAndUpdate(
+    const updated = await PhoneNumber.findByIdAndUpdate(
       req.params.id,
       { phoneNumber, additionalData },
       { new: true }
     );
-    res.status(200).json(updatedPhoneNumber);
+    res.status(200).json(updated);
   } catch (error) {
     res.status(500).json({ message: 'Error updating phone number', error });
   }
 });
 
+// Delete
 router.delete('/:id', async (req, res) => {
   try {
     await PhoneNumber.findByIdAndDelete(req.params.id);
@@ -62,4 +65,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 module.exports = router;
-
