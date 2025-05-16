@@ -46,8 +46,11 @@ const AdminUserList = () => {
             {users.map((user) => (
               <tr key={user._id}>
                 <td>{user.email}</td>
-               
-                <td>{new Date(user.createdAt).toLocaleString()}</td>
+
+                <td>{new Date(user.createdAt).toLocaleString('ur-PK', {
+                  dateStyle: 'medium',
+                  timeStyle: 'short',
+                })}</td>
                 <td>
                   <button className="btn btn-danger btn-sm" onClick={() => deleteUser(user._id)}>
                     Delete
