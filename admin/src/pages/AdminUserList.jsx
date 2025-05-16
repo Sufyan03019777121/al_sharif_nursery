@@ -35,7 +35,7 @@ const AdminUserList = () => {
         <p>No users found</p>
       ) : (
         <table className="table table-bordered">
-          <thead className="table-dark">
+          <thead className="table-success">
             <tr>
               <th>Email</th>
               <th>Created At</th>
@@ -46,6 +46,7 @@ const AdminUserList = () => {
             {users.map((user) => (
               <tr key={user._id}>
                 <td>{user.email}</td>
+               
                 <td>{new Date(user.createdAt).toLocaleString()}</td>
                 <td>
                   <button className="btn btn-danger btn-sm" onClick={() => deleteUser(user._id)}>
