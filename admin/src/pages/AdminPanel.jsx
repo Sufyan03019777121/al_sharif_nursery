@@ -15,7 +15,7 @@ const AdminPanel = () => {
   const [phoneNumberToEdit, setPhoneNumberToEdit] = useState(null);
   const [additionalData, setAdditionalData] = useState('');
   const [warningMessage, setWarningMessage] = useState('');
-  
+
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -238,9 +238,9 @@ const AdminPanel = () => {
                         ))}
                       </td>
                       <td>{product.title}</td>
-                      <td 
-                      className='text-truncate'
-                      style={{maxWidth: '100px'}}
+                      <td
+                        className='text-truncate'
+                        style={{ maxWidth: '100px' }}
                       >{product.description}</td>
                       <td>{product.price}</td>
                       <td>
@@ -259,7 +259,7 @@ const AdminPanel = () => {
           </Row>
         </Tab>
 
-        <Tab eventKey="phoneNumbers"  title="Phone Numbers">
+        <Tab eventKey="phoneNumbers" title="Phone Numbers">
           <Row className="mt-4">
             <Col md={12}>
               <h4>Phone Numbers</h4>
@@ -303,6 +303,7 @@ const AdminPanel = () => {
                 <thead>
                   <tr>
                     <th>Phone Number</th>
+                    <th>date</th>
                     <th>Additional Data</th>
                     <th>Actions</th>
                   </tr>
@@ -311,6 +312,9 @@ const AdminPanel = () => {
                   {phoneNumbers.map((phoneNumber) => (
                     <tr key={phoneNumber._id}>
                       <td>{phoneNumber.phoneNumber}</td>
+                      <td>{new Date(phoneNumber.createdAt).toLocaleString('ur-PK', {
+                        timeZone: 'Asia/Karachi'
+                      })}</td>
                       <td>{phoneNumber.additionalData}</td>
                       <td>
                         <Button variant="info p-1 py-0" onClick={() => handleEditPhoneNumber(phoneNumber)}>Edit</Button>{' '}
@@ -353,14 +357,14 @@ const AdminPanel = () => {
             </Col>
           </Row>
         </Tab>
-          
-            
-          
+
+
+
       </Tabs>
-     
-        <AdminUserList/>
-      
-      
+
+      <AdminUserList />
+
+
     </Container>
   );
 };

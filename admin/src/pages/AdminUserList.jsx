@@ -38,7 +38,7 @@ const AdminUserList = () => {
           <thead className="table-success">
             <tr>
               <th>Email</th>
-              <th>Created At</th>
+              <th>Date</th>
               <th>Delete</th>
             </tr>
           </thead>
@@ -48,8 +48,7 @@ const AdminUserList = () => {
                 <td>{user.email}</td>
 
                 <td>{new Date(user.createdAt).toLocaleString('ur-PK', {
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
+                  timeZone: 'Asia/Karachi'
                 })}</td>
                 <td>
                   <button className="btn btn-danger btn-sm" onClick={() => deleteUser(user._id)}>
