@@ -13,7 +13,26 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 connectDB();
-app.use(cors());
+
+// Define allowed origins (add your frontend URL here)
+const allowedOrigins = [
+  'http://localhost:3000',                 // local React dev server
+  'https://al-sharif-nursery-frontend.onrender.com'  // your deployed frontend (replace with actual URL)
+];
+
+// Use CORS middleware with origin check
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like Postman or server-to-server requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy: This origin is not allowed'));
+    }
+  }
+}));
+
 app.use(express.json());
 
 app.use('/api', authRoutes); // /api/register, /api/login, /api/users
