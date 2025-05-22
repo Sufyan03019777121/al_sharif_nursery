@@ -48,6 +48,19 @@ router.delete('/users/:id', async (req, res) => {
   }
 });
 
+// Delete contacts by ID
+router.delete('/contacts/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await User.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ message: 'contacts not found' });
+    res.status(200).json({ message: 'contacts deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Deletion failed', error: err.message });
+  }
+});
+
+
 
 // Get all users
 router.get('/users', async (req, res) => {
@@ -56,6 +69,14 @@ router.get('/users', async (req, res) => {
     res.status(200).json(users);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch users', error: err.message });
+  }
+});
+router.get('/contacts', async (req, res) => {
+  try {
+    const contacts = await User.find({}, 'email createdAt').sort({ createdAt: -1 });
+    res.status(200).json(contacts);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch contacts', error: err.message });
   }
 });
 
