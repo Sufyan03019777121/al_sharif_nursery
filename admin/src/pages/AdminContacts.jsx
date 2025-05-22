@@ -4,7 +4,6 @@ const AdminContacts = () => {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // تمام messages fetch کریں
   const fetchContacts = async () => {
     try {
       const res = await fetch('https://al-sharif-nursery.onrender.com/api/contact');
@@ -21,7 +20,6 @@ const AdminContacts = () => {
     fetchContacts();
   }, []);
 
-  // ایک message delete کریں
   const handleDelete = async (id) => {
     if (!window.confirm('کیا آپ واقعی اس پیغام کو حذف کرنا چاہتے ہیں؟')) return;
 
@@ -32,7 +30,6 @@ const AdminContacts = () => {
 
       if (res.ok) {
         alert('پیغام حذف ہو گیا۔');
-        // delete ہونے کے بعد دوبارہ fetch کریں یا locally remove کریں
         setContacts(contacts.filter(contact => contact._id !== id));
       } else {
         alert('حذف کرنے میں مسئلہ ہے۔');
@@ -43,26 +40,49 @@ const AdminContacts = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center py-5">
+        <div className="spinner-border text-success" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-4">
-      <h2>Admin: Contact Messages</h2>
+      <h2 className="text-center mb-4 text-success">📬 ایڈمن پیغامات</h2>
+
       {contacts.length === 0 ? (
-        <p>No messages found.</p>
+        <div className="alert alert-warning text-center">
+          کوئی پیغامات موجود نہیں ہیں۔
+        </div>
       ) : (
-        <ul className="list-group">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           {contacts.map(({ _id, name, email, message, createdAt }) => (
-            <li key={_id} className="list-group-item d-flex justify-content-between align-items-start">
-              <div>
-                <h5>{name} ({email})</h5>
-                <p>{message}</p>
-                <small>{new Date(createdAt).toLocaleString()}</small>
+            <div key={_id} className="col">
+              <div className="card h-100 shadow-sm border-0">
+                <div className="card-body">
+                  <h5 className="card-title">{name}</h5>
+                  <h6 className="card-subtitle mb-2 text-muted">{email}</h6>
+                  <p className="card-text">{message}</p>
+                </div>
+                <div className="card-footer d-flex justify-content-between align-items-center bg-light">
+                  <small className="text-muted">
+                    موصول ہوا: {new Date(createdAt).toLocaleString()}
+                  </small>
+                  <button
+                    className="btn btn-sm btn-outline-danger"
+                    onClick={() => handleDelete(_id)}
+                  >
+                    🗑️ حذف کریں
+                  </button>
+                </div>
               </div>
-              <button className="btn btn-danger btn-sm" onClick={() => handleDelete(_id)}>Delete</button>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
