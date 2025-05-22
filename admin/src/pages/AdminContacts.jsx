@@ -6,7 +6,7 @@ const AdminContacts = () => {
 
   const fetchContacts = async () => {
     try {
-      const res = await fetch('https://al-sharif-nursery.onrender.com/api/contact');
+      const res = await fetch('https://al-sharif-nursery.onrender.com/api/contacts');
       const data = await res.json();
       setContacts(data);
       setLoading(false);
@@ -24,7 +24,7 @@ const AdminContacts = () => {
     if (!window.confirm('کیا آپ واقعی اس پیغام کو حذف کرنا چاہتے ہیں؟')) return;
 
     try {
-      const res = await fetch(`https://al-sharif-nursery.onrender.com/api/contact/${id}`, {
+      const res = await fetch(`https://al-sharif-nursery.onrender.com/api/contacts/${id}`, {
         method: 'DELETE',
       });
 

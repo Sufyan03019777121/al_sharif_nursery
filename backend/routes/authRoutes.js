@@ -73,7 +73,7 @@ router.get('/users', async (req, res) => {
 });
 router.get('/contacts', async (req, res) => {
   try {
-    const contacts = await User.find({}, 'email createdAt').sort({ createdAt: -1 });
+    const contacts = await User.find({}, 'name email message createdAt').sort({ createdAt: -1 });
     res.status(200).json(contacts);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch contacts', error: err.message });
