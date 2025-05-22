@@ -1,7 +1,6 @@
-// models/Contact.js
 const mongoose = require('mongoose');
 
-const contactsSchema = new mongoose.Schema({
+const contactSchema = new mongoose.Schema({
   name: String,
   email: String,
   message: String,
@@ -11,4 +10,4 @@ const contactsSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Contacts', contacstSchema);
+module.exports = mongoose.model('Contact', contactSchema);
