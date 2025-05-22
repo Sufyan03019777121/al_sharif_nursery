@@ -18,7 +18,7 @@ const AdminContacts = () => {
     if (!window.confirm('Are you sure you want to delete this contact?')) return;
 
     try {
-      const res = await fetch(`https://al-sharif-nursery.onrender.com/api/contacts/${id}`, {
+      const res = await fetch(`https://al-sharif-nursery.onrender.com/api//$contacts{id}`, {
         method: 'DELETE',
       });
 

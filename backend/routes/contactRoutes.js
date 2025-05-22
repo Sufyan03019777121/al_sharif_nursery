@@ -11,7 +11,7 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const newContact = new Contact({ name, email, message });
+    const newContact = new contacts({ name, email, message });
     await newContact.save();
 
     res.status(201).json({ success: true, message: 'Message saved successfully!' });
@@ -22,7 +22,7 @@ router.post('/', async (req, res) => {
 });
 
 // GET - Get All Contacts (Admin)
-router.get('/', async (req, res) => {
+router.get('/contacts', async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
     res.json(contacts);
@@ -35,8 +35,8 @@ router.get('/', async (req, res) => {
 // DELETE - Delete Contact by ID (Admin)
 router.delete('/:id', async (req, res) => {
   try {
-    await Contact.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Contact deleted successfully' });
+    await contacts.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'contact deleted successfully' });
   } catch (err) {
     console.error('❌ Error deleting contact:', err);
     res.status(500).json({ success: false, message: 'Delete failed' });
