@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ createdAt: -1 });
-    res.json(contacts);
+    res.status(200).json(contacts);
   } catch (err) {
     console.error('❌ Error fetching contacts:', err);
     res.status(500).json({ success: false, message: 'Failed to fetch contacts' });
