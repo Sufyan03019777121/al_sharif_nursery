@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Table, Button, Modal, Form, Container, Row, Col, Image, Tabs, Tab } from 'react-bootstrap';
 import { FaTrash, FaEdit } from 'react-icons/fa';
 import AdminUserList from './AdminUserList';
+import AdminContacts from './AdminContacts';
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
@@ -361,8 +362,9 @@ const AdminPanel = () => {
 
 
       </Tabs>
-
+      <AdminContacts/>
       <AdminUserList />
+
 
 
     </Container>
