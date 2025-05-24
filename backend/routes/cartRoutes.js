@@ -1,4 +1,3 @@
-// routes/cart.js
 const express = require('express');
 const router = express.Router();
 const Cart = require('../models/Cart');
@@ -42,6 +41,21 @@ router.post('/add', async (req, res) => {
 
   } catch (error) {
     console.error('Error adding to cart:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// نیا GET route جو فون نمبر کے حساب سے کارٹ دیتا ہے
+router.get('/:phoneNumber', async (req, res) => {
+  const phoneNumber = req.params.phoneNumber;
+  try {
+    const cart = await Cart.findOne({ phoneNumber });
+    if (!cart) {
+      return res.status(404).json({ message: 'Cart not found' });
+    }
+    res.json(cart);
+  } catch (error) {
+    console.error('Error fetching cart:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
