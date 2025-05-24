@@ -60,4 +60,25 @@ router.get('/:phoneNumber', async (req, res) => {
   }
 });
 
+// DELETE item from cart
+router.delete('/remove/:phoneNumber/:productId', async (req, res) => {
+  const { phoneNumber, productId } = req.params;
+
+  try {
+    const cart = await Cart.findOne({ phoneNumber });
+
+    if (!cart) return res.status(404).json({ message: 'Cart not found' });
+
+    cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+
+    await cart.save();
+    res.json({ message: 'Item removed from cart', cart });
+
+  } catch (error) {
+    console.error('Error removing item from cart:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 module.exports = router;
