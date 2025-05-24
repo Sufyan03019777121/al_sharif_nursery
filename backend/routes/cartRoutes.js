@@ -1,37 +1,48 @@
+// routes/cart.js
 const express = require('express');
 const router = express.Router();
 const Cart = require('../models/Cart');
+const Product = require('../models/Product');
 
-// POST: Save or Update Cart
-router.post('/', async (req, res) => {
-  const { phoneNumber, items } = req.body;
+router.post('/add', async (req, res) => {
+  const { phoneNumber, productId } = req.body;
 
   try {
-    const existingCart = await Cart.findOne({ phoneNumber });
+    const product = await Product.findById(productId);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    if (existingCart) {
-      existingCart.items = items;
-      await existingCart.save();
-      return res.json({ message: 'Cart updated', cart: existingCart });
+    let cart = await Cart.findOne({ phoneNumber });
+
+    if (!cart) {
+      cart = new Cart({
+        phoneNumber,
+        items: [{
+          productId,
+          title: product.title,
+          price: product.price,
+          quantity: 1,
+        }]
+      });
     } else {
-      const newCart = await Cart.create({ phoneNumber, items });
-      return res.json({ message: 'Cart created', cart: newCart });
+      const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
+      if (itemIndex > -1) {
+        cart.items[itemIndex].quantity += 1;
+      } else {
+        cart.items.push({
+          productId,
+          title: product.title,
+          price: product.price,
+          quantity: 1
+        });
+      }
     }
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
 
-// GET: Retrieve Cart by Phone Number
-router.get('/:phoneNumber', async (req, res) => {
-  const { phoneNumber } = req.params;
-
-  try {
-    const cart = await Cart.findOne({ phoneNumber });
-    if (!cart) return res.status(404).json({ error: 'Cart not found' });
+    await cart.save();
     res.json(cart);
+
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error adding to cart:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

@@ -1,16 +1,16 @@
+// models/Cart.js
 const mongoose = require('mongoose');
 
-const itemSchema = new mongoose.Schema({
-  productId: String,
-  title: String,
-  price: Number,
-  quantity: Number,
-  image: String,
-});
-
 const cartSchema = new mongoose.Schema({
-  phoneNumber: { type: String, required: true, unique: true },
-  items: [itemSchema],
+  phoneNumber: { type: String, required: true },
+  items: [
+    {
+      productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      title: String,
+      price: Number,
+      quantity: { type: Number, default: 1 },
+    }
+  ]
 });
 
 module.exports = mongoose.model('Cart', cartSchema);
