@@ -17,6 +17,9 @@ const AdminPanel = () => {
   const [additionalData, setAdditionalData] = useState('');
   const [warningMessage, setWarningMessage] = useState('');
 
+  // New state for toggling AdminContacts and AdminUserList
+  // null = none shown, 'contacts' = AdminContacts shown, 'users' = AdminUserList shown
+  const [activeComponent, setActiveComponent] = useState(null);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -40,6 +43,8 @@ const AdminPanel = () => {
       setPhoneNumbers(response.data);
       if (response.data.length >= 100) {
         setWarningMessage('Warning: Only 10 more phone numbers can be added.');
+      } else {
+        setWarningMessage('');
       }
     } catch (error) {
       console.error('Error fetching phone numbers:', error);
@@ -131,6 +136,15 @@ const AdminPanel = () => {
       fetchPhoneNumbers(); // Refresh list
     } catch (error) {
       console.error('Error adding phone number:', error);
+    }
+  };
+
+  // Function to toggle which component to show (contacts or users)
+  const toggleComponent = (componentName) => {
+    if (activeComponent === componentName) {
+      setActiveComponent(null); // hide if clicked again
+    } else {
+      setActiveComponent(componentName);
     }
   };
 
@@ -261,112 +275,123 @@ const AdminPanel = () => {
         </Tab>
 
         <Tab eventKey="phoneNumbers" title="Phone Numbers">
-          <Row className="mt-4">
-            <Col md={12}>
-              <h4>Phone Numbers</h4>
+          <Row>
+            <Col>
+              <h4>Phone Numbers List</h4>
               {warningMessage && <p className="text-danger">{warningMessage}</p>}
-
-              <Form className="mb-4" onSubmit={(e) => {
-                e.preventDefault();
-                handleAddPhoneNumber();
-              }}>
-                <Form.Group controlId="formPhoneNumber">
-                  <Form.Label>New Phone Number</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter phone number"
-                    value={phoneNumberToEdit?.phoneNumber || ''}
-                    onChange={(e) =>
-                      setPhoneNumberToEdit({
-                        ...phoneNumberToEdit,
-                        phoneNumber: e.target.value
-                      })
-                    }
-                  />
-                </Form.Group>
-
-                <Form.Group controlId="formAdditionalData">
-                  <Form.Label>Additional Data</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Enter additional info (optional)"
-                    value={additionalData}
-                    onChange={(e) => setAdditionalData(e.target.value)}
-                  />
-                </Form.Group>
-
-                <Button variant="primary" type="submit" className="mt-2">
-                  Add Phone Number
-                </Button>
-              </Form>
-
               <Table striped bordered hover>
                 <thead>
                   <tr>
                     <th>Phone Number</th>
-                    <th>date</th>
                     <th>Additional Data</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {phoneNumbers.map((phoneNumber) => (
-                    <tr key={phoneNumber._id}>
-                      <td>{phoneNumber.phoneNumber}</td>
-                      <td>{new Date(phoneNumber.createdAt).toLocaleString('ur-PK', {
-                        timeZone: 'Asia/Karachi'
-                      })}</td>
-                      <td>{phoneNumber.additionalData}</td>
+                  {phoneNumbers.map((phone) => (
+                    <tr key={phone._id}>
+                      <td>{phone.phoneNumber}</td>
+                      <td>{phone.additionalData}</td>
                       <td>
-                        <Button variant="info p-1 py-0" onClick={() => handleEditPhoneNumber(phoneNumber)}>Edit</Button>{' '}
-                        <Button variant="danger p-1 py-0" onClick={() => handleDeletePhoneNumber(phoneNumber._id)}>Delete</Button>
+                        <Button variant="warning" size="sm" onClick={() => handleEditPhoneNumber(phone)} className="me-2">
+                          <FaEdit />
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => handleDeletePhoneNumber(phone._id)}>
+                          <FaTrash />
+                        </Button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </Table>
+              <Form className="mt-3">
+                <Form.Group controlId="formNewPhoneNumber">
+                  <Form.Label>Add New Phone Number</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Enter phone number"
+                    value={phoneNumberToEdit?.phoneNumber || ''}
+                    onChange={(e) => setPhoneNumberToEdit({ ...phoneNumberToEdit, phoneNumber: e.target.value })}
+                  />
+                </Form.Group>
 
-              {/* Edit Modal */}
-              <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-                <Modal.Header closeButton>
-                  <Modal.Title>Edit Phone Number</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                  <Form>
-                    <Form.Group>
-                      <Form.Label>Phone Number</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={phoneNumberToEdit?.phoneNumber || ''}
-                        onChange={(e) =>
-                          setPhoneNumberToEdit({ ...phoneNumberToEdit, phoneNumber: e.target.value })
-                        }
-                      />
-                    </Form.Group>
-                    <Form.Group>
-                      <Form.Label>Additional Data</Form.Label>
-                      <Form.Control
-                        type="text"
-                        value={additionalData}
-                        onChange={(e) => setAdditionalData(e.target.value)}
-                      />
-                    </Form.Group>
-                    <Button className="mt-2" onClick={handleSavePhoneNumber}>Save</Button>
-                  </Form>
-                </Modal.Body>
-              </Modal>
+                <Form.Group controlId="formAdditionalData" className="mt-2">
+                  <Form.Label>Additional Data</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Additional info"
+                    value={additionalData}
+                    onChange={(e) => setAdditionalData(e.target.value)}
+                  />
+                </Form.Group>
+
+                <Button variant="success" className="mt-3" onClick={handleAddPhoneNumber}>
+                  Add Phone Number
+                </Button>
+              </Form>
             </Col>
           </Row>
         </Tab>
-
-
-
       </Tabs>
-      <AdminContacts/>
-      <AdminUserList />
 
+      {/* Buttons to toggle AdminContacts and AdminUserList */}
+      <div className="mb-4 mt-4">
+        <Button
+          variant={activeComponent === 'contacts' ? 'primary' : 'outline-primary'}
+          onClick={() => toggleComponent('contacts')}
+          className="me-2"
+        >
+           Contacts
+        </Button>
+        <Button
+          variant={activeComponent === 'users' ? 'primary' : 'outline-primary'}
+          onClick={() => toggleComponent('users')}
+        >
+           User List
+        </Button>
+      </div>
 
+      {/* Conditionally render the components */}
+      {activeComponent === 'contacts' && <AdminContacts />}
+      {activeComponent === 'users' && <AdminUserList />}
 
+      {/* Edit Phone Number Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Phone Number</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group controlId="editPhoneNumber">
+              <Form.Label>Phone Number</Form.Label>
+              <Form.Control
+                type="text"
+                value={phoneNumberToEdit?.phoneNumber || ''}
+                onChange={(e) =>
+                  setPhoneNumberToEdit({ ...phoneNumberToEdit, phoneNumber: e.target.value })
+                }
+              />
+            </Form.Group>
+
+            <Form.Group controlId="editAdditionalData" className="mt-3">
+              <Form.Label>Additional Data</Form.Label>
+              <Form.Control
+                type="text"
+                value={additionalData}
+                onChange={(e) => setAdditionalData(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSavePhoneNumber}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
