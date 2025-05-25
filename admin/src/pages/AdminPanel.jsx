@@ -4,6 +4,7 @@ import { Table, Button, Modal, Form, Container, Row, Col, Image, Tabs, Tab } fro
 import { FaTrash, FaEdit } from 'react-icons/fa';
 import AdminUserList from './AdminUserList';
 import AdminContacts from './AdminContacts';
+import AdminOrders from './AdminOrders';
 
 const AdminPanel = () => {
   const [products, setProducts] = useState([]);
@@ -153,6 +154,7 @@ const AdminPanel = () => {
       <Row className="align-items-center justify-content-between mb-3">
         <Col><h2>Al Sharif Nursery Admin Panel</h2></Col>
       </Row>
+      <AdminOrders/>
 
       <Tabs defaultActiveKey="products" className="mb-3">
         <Tab eventKey="products" title="Products">
