@@ -10,7 +10,6 @@ const AdminOrders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updateData, setUpdateData] = useState({ name: '', address: '' });
 
-  // Fetch all orders
   const fetchOrders = async () => {
     try {
       setLoading(true);
@@ -27,19 +26,16 @@ const AdminOrders = () => {
     fetchOrders();
   }, []);
 
-  // Open modal for update
   const handleEdit = (order) => {
     setSelectedOrder(order);
     setUpdateData({ name: order.name, address: order.address });
     setShowModal(true);
   };
 
-  // Handle update form change
   const handleChange = (e) => {
     setUpdateData({ ...updateData, [e.target.name]: e.target.value });
   };
 
-  // Submit updated order
   const handleUpdate = async () => {
     try {
       await axios.put(`https://al-sharif-nursery.onrender.com/api/orders/${selectedOrder._id}`, updateData);
@@ -51,7 +47,6 @@ const AdminOrders = () => {
     }
   };
 
-  // Delete order
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure to delete this order?')) return;
 
@@ -86,27 +81,56 @@ const AdminOrders = () => {
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr key={order._id}>
-                <td>{order.name}</td>
-                <td>{order.phoneNumber}</td>
-                <td>{order.address}</td>
-                <td>{order.totalAmount.toFixed(2)}</td>
-                <td>{new Date(order.orderDate).toLocaleString()}</td>
-                <td>
-                  <Button variant="warning" size="sm" className="me-2" onClick={() => handleEdit(order)}>
-                    Edit
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(order._id)}>
-                    Delete
-                  </Button>
-                </td>
-              </tr>
+              <React.Fragment key={order._id}>
+                <tr>
+                  <td>{order.name}</td>
+                  <td>{order.phoneNumber}</td>
+                  <td>{order.address}</td>
+                  <td>{order.totalAmount.toFixed(2)}</td>
+                  <td>{new Date(order.orderDate).toLocaleString()}</td>
+                  <td>
+                    <Button variant="warning" size="sm" className="me-2" onClick={() => handleEdit(order)}>
+                      Edit
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => handleDelete(order._id)}>
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+
+                {/* Items Table Below Each Order */}
+                {order.items && order.items.length > 0 && (
+                  <tr>
+                    <td colSpan="6">
+                      <strong>Items:</strong>
+                      <Table striped bordered size="sm" className="mt-2">
+                        <thead>
+                          <tr>
+                            <th>Title</th>
+                            <th>Price (Rs)</th>
+                            <th>Quantity</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {order.items.map((item, idx) => (
+                            <tr key={idx}>
+                              <td>{item.title}</td>
+                              <td>{item.price}</td>
+                              <td>{item.quantity}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </Table>
       )}
 
-      {/* Update Modal */}
+      {/* Modal for Update */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Update Order</Modal.Title>
