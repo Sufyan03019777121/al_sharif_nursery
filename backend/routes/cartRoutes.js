@@ -3,6 +3,7 @@ const router = express.Router();
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
+// Add item to cart
 router.post('/add', async (req, res) => {
   const { phoneNumber, productId } = req.body;
 
@@ -45,7 +46,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-// نیا GET route جو فون نمبر کے حساب سے کارٹ دیتا ہے
+// Get cart by phoneNumber
 router.get('/:phoneNumber', async (req, res) => {
   const phoneNumber = req.params.phoneNumber;
   try {
@@ -60,7 +61,7 @@ router.get('/:phoneNumber', async (req, res) => {
   }
 });
 
-// DELETE item from cart
+// Remove item from cart
 router.delete('/remove/:phoneNumber/:productId', async (req, res) => {
   const { phoneNumber, productId } = req.params;
 
@@ -80,5 +81,16 @@ router.delete('/remove/:phoneNumber/:productId', async (req, res) => {
   }
 });
 
+// Clear cart for given phoneNumber
+router.delete('/clear/:phoneNumber', async (req, res) => {
+  try {
+    const phone = req.params.phoneNumber;
+    await Cart.deleteOne({ phoneNumber: phone });
+    res.json({ message: 'Cart cleared successfully' });
+  } catch (err) {
+    console.error('Error clearing cart:', err);
+    res.status(500).json({ message: 'Failed to clear cart' });
+  }
+});
 
 module.exports = router;
