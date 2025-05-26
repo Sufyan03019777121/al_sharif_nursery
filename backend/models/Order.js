@@ -6,13 +6,13 @@ const orderSchema = new mongoose.Schema({
   address: { type: String, required: true },
   items: [
     {
-      title: String,
-      price: Number,
-      quantity: Number,
+      title: { type: String },
+      price: { type: Number },
+      quantity: { type: Number },
     },
   ],
   totalAmount: { type: Number, required: true },
-  orderDate: { type: Date, default: Date.now }
+  orderDate: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('Order', orderSchema);
