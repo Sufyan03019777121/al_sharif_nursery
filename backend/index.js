@@ -8,35 +8,35 @@ const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const phoneRoutes = require('./routes/phoneRoutes');
 const contactRoutes = require('./routes/contactRoutes');
-const cartRoutes = require('./routes/cartRoutes');   // main cart routes
-const ordersRouter = require('./routes/orders');      // orders routes
+const cartRoutes = require('./routes/cartRoutes');    // your merged cartRoutes
+const ordersRouter = require('./routes/orders');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to DB
+// Connect to MongoDB
 connectDB();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Test root endpoint
+// Root test endpoint
 app.get('/', (req, res) => {
   res.send('API is running');
 });
 
-// Routes
-app.use('/api', authRoutes);           // /api/register, /api/login, /api/users etc
+// API Routes
+app.use('/api', authRoutes);           // e.g., /api/register, /api/login
 app.use('/api/products', productRoutes);
 app.use('/api/phoneNumbers', phoneRoutes);
 app.use('/api/contacts', contactRoutes);
-app.use('/api/cart', cartRoutes);      // Cart routes
-app.use('/api/orders', ordersRouter);  // Orders routes
+app.use('/api/cart', cartRoutes);      // cart routes
+app.use('/api/orders', ordersRouter);
 
-// Start server
+// Start the server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
