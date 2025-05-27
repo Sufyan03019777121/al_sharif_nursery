@@ -63,6 +63,7 @@ const AdminOrders = () => {
 
   return (
     <Container className="mt-4">
+      
       <h2>Admin Orders</h2>
       {error && <Alert variant="danger">{error}</Alert>}
       {orders.length === 0 ? (
@@ -89,9 +90,7 @@ const AdminOrders = () => {
                   <td>{order.totalAmount.toFixed(2)}</td>
                   <td>{new Date(order.orderDate).toLocaleString()}</td>
                   <td>
-                    <Button variant="warning" size="sm" className="me-2" onClick={() => handleEdit(order)}>
-                      Edit
-                    </Button>
+                   
                     <Button variant="danger" size="sm" onClick={() => handleDelete(order._id)}>
                       Delete
                     </Button>

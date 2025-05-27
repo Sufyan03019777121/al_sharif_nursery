@@ -152,9 +152,13 @@ const AdminPanel = () => {
   return (
     <Container className="mt-4">
       <Row className="align-items-center justify-content-between mb-3">
-        <Col><h2>Al Sharif Nursery Admin Panel</h2></Col>
+        
+        <div className="shadow rounded text-center mb-3 p-3 bg-success bg-opacity-10">
+        <h2 className="text-center">AL Sharif Nursery</h2>
+      </div>
+      <Col><h2 className="text-center"> Admin Panel</h2></Col>
       </Row>
-      <AdminOrders/>
+      <AdminOrders />
 
       <Tabs defaultActiveKey="products" className="mb-3">
         <Tab eventKey="products" title="Products">
@@ -293,7 +297,18 @@ const AdminPanel = () => {
                   {phoneNumbers.map((phone) => (
                     <tr key={phone._id}>
                       <td>{phone.phoneNumber}</td>
-                      <td>{phone.additionalData}</td>
+                      <td>
+                        {new Date(phone.createdAt).toLocaleString('en-PK', {
+                          timeZone: 'Asia/Karachi',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
+                      </td>
+
                       <td>
                         <Button variant="warning" size="sm" onClick={() => handleEditPhoneNumber(phone)} className="me-2">
                           <FaEdit />
@@ -343,13 +358,13 @@ const AdminPanel = () => {
           onClick={() => toggleComponent('contacts')}
           className="me-2"
         >
-           Contacts
+          Contacts
         </Button>
         <Button
           variant={activeComponent === 'users' ? 'primary' : 'outline-primary'}
           onClick={() => toggleComponent('users')}
         >
-           User List
+          User List
         </Button>
       </div>
 
