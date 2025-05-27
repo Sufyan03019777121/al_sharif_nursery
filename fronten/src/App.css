@@ -1,0 +1,11 @@
+*{
+ margin: 0px;
+ padding: 0px;
+ box-sizing: border-box;
+}
+.background_light_green{
+  background-color: #f0ffea;
+}
+.background_light_yellow{
+  background-color: #ffff0033;
+}
