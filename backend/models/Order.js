@@ -6,9 +6,9 @@ const orderSchema = new mongoose.Schema({
   address: { type: String, required: true },
   items: [
     {
-      title: { type: String },
-      price: { type: Number },
-      quantity: { type: Number },
+      title: { type: String, required: true },
+      price: { type: Number, required: true },
+      quantity: { type: Number, required: true },
     },
   ],
   totalAmount: { type: Number, required: true },
