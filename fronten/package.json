@@ -19,7 +19,8 @@
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
   },
-  "homepage": "https://Sufyan03019777121.github.io/alsharif_frontend",
+  "homepage": "https://alsharif-nursery.onrender.com",
+
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
