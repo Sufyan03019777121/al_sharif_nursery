@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Card, Button, Form, Modal } from 'react-bootstrap';
-import { FaShoppingCart, FaWhatsapp, FaPhone } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import ProductCard from './ProductCard';
+import PhoneNumberModal from './PhoneNumberModal';
+import CartModal from './CartModal';
+import SearchBar from './SearchBar';
+import { FaShoppingCart } from 'react-icons/fa';
 
-const HomePage = () => {
+const Home = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterBy, setFilterBy] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isPhoneNumberSubmitted, setIsPhoneNumberSubmitted] = useState(false);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -105,31 +109,78 @@ const HomePage = () => {
     }
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleFilterByTitle = (type) => {
+    setSearchTerm('');
+    setFilterBy(type);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFilterBy('');
+  };
+
+  const filteredProducts = products.filter((product) => {
+    if (filterBy) {
+      return product.title.toLowerCase().includes(filterBy.toLowerCase());
+    }
+    return product.title.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const isInCart = (id) => cart.some((item) => item.productId === id);
+
+  const handleCheckout = () => {
+    navigate('/CheckoutPage');
+    setShowCart(false);
+  };
 
   return (
     <Container className="mt-4">
       <div className="shadow rounded mb-3 p-3 bg-success bg-opacity-10">
-        <h2 className="text-center">AL Sharif Nursery  </h2>
+        <h2 className="text-center">AL Sharif Nursery</h2>
       </div>
 
-      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-        <Form.Control
-          type="text"
-          placeholder="Search Plants..."
-          className="shadow border-0 me-3 mb-2"
-          style={{ maxWidth: '300px' }}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+      <SearchBar
+        searchTerm={searchTerm}
+        setSearchTerm={(term) => {
+          setSearchTerm(term);
+          setFilterBy('');
+        }}
+        isPhoneNumberSubmitted={isPhoneNumberSubmitted}
+      />
+
+      <div className="mb-3 d-flex gap-2 flex-wrap">
+       
+        <Button
+          variant="success"
+          onClick={() => clearFilters()}
           disabled={!isPhoneNumberSubmitted}
-        />
-        <Button variant="dark" onClick={() => setShowCart(true)} disabled={!isPhoneNumberSubmitted}>
-          <FaShoppingCart className="mb-1" /> View Cart ({cart.length})
+        >
+          All Products
         </Button>
+        <Button
+          variant="success"
+          onClick={() => handleFilterByTitle('Outdoor')}
+          disabled={!isPhoneNumberSubmitted}
+        >
+          Outdoor
+        </Button>
+        <Button
+          variant="success"
+          onClick={() => handleFilterByTitle('Indoor')}
+          disabled={!isPhoneNumberSubmitted}
+        >
+          Indoor
+        </Button>
+         <Button
+          variant="outline-success"
+          onClick={() => setShowCart(true)}
+          disabled={!isPhoneNumberSubmitted}
+          
+        >
+          <FaShoppingCart className="mb-1 me-1" />
+          Cart ({cart.length})
+        </Button>
+     
       </div>
 
       <p>Total Products: {filteredProducts.length}</p>
@@ -137,114 +188,32 @@ const HomePage = () => {
       <Row xs={1} md={2} lg={3} className="g-4">
         {filteredProducts.map((product) => (
           <Col key={product._id}>
-            <Card className="h-100">
-              <div style={{ display: 'flex', gap: '5px', padding: '5px' }}>
-                {product.images?.slice(0, 2).map((img, index) => (
-                  <Card.Img
-                    key={index}
-                    variant="top"
-                    src={img}
-                    alt={product.title}
-                    style={{ height: '150px', width: '49%', objectFit: 'cover' }}
-                  />
-                ))}
-              </div>
-              <Card.Body>
-                <Card.Title>{product.title}</Card.Title>
-                <Card.Text className="text-truncate">{product.description}</Card.Text>
-                <Card.Text>
-                  <strong>Rs {product.price}</strong>{' '}
-                  <span style={{ color: 'red', textDecoration: 'line-through', fontSize: '1.2rem' }}>
-                    Rs {product.price * 2}
-                  </span>
-                </Card.Text>
-                <div className="d-flex justify-content-between flex-wrap gap-2">
-                  <Button
-                    variant="success"
-                    href={`https://wa.me/923059425997?text=I'm interested in ${encodeURIComponent(product.title)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="WhatsApp"
-                  >
-                    <FaWhatsapp className="mb-1" />
-                  </Button>
-                  <Button variant="primary" href="tel:03059425997" title="Call">
-                    <FaPhone />
-                  </Button>
-                  <Button as={Link} to={`/product/${product._id}`} variant="info" title="Details">
-                    Detail
-                  </Button>
-                  <Button
-                    variant={isInCart(product._id) ? "success" : "warning"}
-                    onClick={() => addToCart(product)}
-                    disabled={isInCart(product._id) || !isPhoneNumberSubmitted}
-                    title={!isPhoneNumberSubmitted ? "Phone number required" : isInCart(product._id) ? "Already in Cart" : "Add to Cart"}
-                  >
-                    {isInCart(product._id) ? "Added" : "Cart"}
-                  </Button>
-                </div>
-              </Card.Body>
-            </Card>
+            <ProductCard
+              product={product}
+              isInCart={isInCart}
+              addToCart={addToCart}
+              isPhoneNumberSubmitted={isPhoneNumberSubmitted}
+            />
           </Col>
         ))}
       </Row>
 
-      {/* Phone Number Modal */}
-      <Modal show={showModal} backdrop="static" keyboard={false} centered>
-        <Modal.Header>
-          <Modal.Title>Enter Your Phone Number</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Control
-            type="text"
-            placeholder="Enter phone number"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-          <small className="text-muted">Phone number is required to continue.</small>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handlePhoneSubmit}>Submit</Button>
-        </Modal.Footer>
-      </Modal>
+      <PhoneNumberModal
+        showModal={showModal}
+        phoneNumber={phoneNumber}
+        setPhoneNumber={setPhoneNumber}
+        handlePhoneSubmit={handlePhoneSubmit}
+      />
 
-      {/* Cart Modal */}
-      <Modal show={showCart} onHide={() => setShowCart(false)} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Your Cart</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {cart.length === 0 ? (
-            <p>No items in cart.</p>
-          ) : (
-            cart.map((item, index) => (
-              <div
-                key={index}
-                className="mb-2 border-bottom pb-2 d-flex justify-content-between align-items-center flex-wrap"
-              >
-                <div>
-                  <h6>{item.title}</h6>
-                  <p>Quantity: {item.quantity || 1}</p>
-                  <p>Price: Rs {item.price}</p>
-                </div>
-                <div className="d-flex gap-2">
-                  <Button variant="danger" onClick={() => removeFromCart(item.productId)}>
-                    Remove
-                  </Button>
-                  <Button variant="success" onClick={() => navigate(`/checkout/${item.productId}`)}>
-                    Checkout Page
-                  </Button>
-                </div>
-              </div>
-            ))
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCart(false)}>Close</Button>
-        </Modal.Footer>
-      </Modal>
+      <CartModal
+        showCart={showCart}
+        setShowCart={setShowCart}
+        cart={cart}
+        removeFromCart={removeFromCart}
+        handleCheckout={handleCheckout}
+      />
     </Container>
   );
 };
 
-export default HomePage;
+export default Home;
