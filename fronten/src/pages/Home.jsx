@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Form, Modal } from 'react-bootstrap';
 import { FaShoppingCart, FaWhatsapp, FaPhone } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
@@ -13,6 +13,8 @@ const HomePage = () => {
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const savedPhone = localStorage.getItem('phoneNumber');
     if (savedPhone) {
@@ -21,7 +23,7 @@ const HomePage = () => {
       fetchProducts();
       fetchCart(savedPhone);
     } else {
-      setShowModal(true); // Show modal immediately
+      setShowModal(true);
     }
 
     const interval = setInterval(() => {
@@ -112,7 +114,7 @@ const HomePage = () => {
   return (
     <Container className="mt-4">
       <div className="shadow rounded mb-3 p-3 bg-success bg-opacity-10">
-        <h2 className="text-center">AL Sharif Nursery</h2>
+        <h2 className="text-center">AL Sharif Nursery  </h2>
       </div>
 
       <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
@@ -187,7 +189,7 @@ const HomePage = () => {
         ))}
       </Row>
 
-      {/* Phone Number Modal (Required) */}
+      {/* Phone Number Modal */}
       <Modal show={showModal} backdrop="static" keyboard={false} centered>
         <Modal.Header>
           <Modal.Title>Enter Your Phone Number</Modal.Title>
@@ -218,16 +220,21 @@ const HomePage = () => {
             cart.map((item, index) => (
               <div
                 key={index}
-                className="mb-2 border-bottom pb-2 d-flex justify-content-between align-items-center"
+                className="mb-2 border-bottom pb-2 d-flex justify-content-between align-items-center flex-wrap"
               >
                 <div>
                   <h6>{item.title}</h6>
                   <p>Quantity: {item.quantity || 1}</p>
                   <p>Price: Rs {item.price}</p>
                 </div>
-                <Button variant="danger" onClick={() => removeFromCart(item.productId)}>
-                  Remove
-                </Button>
+                <div className="d-flex gap-2">
+                  <Button variant="danger" onClick={() => removeFromCart(item.productId)}>
+                    Remove
+                  </Button>
+                  <Button variant="success" onClick={() => navigate(`/checkout/${item.productId}`)}>
+                    Checkout Page
+                  </Button>
+                </div>
               </div>
             ))
           )}
