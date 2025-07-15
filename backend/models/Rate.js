@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const rateSchema = new mongoose.Schema({
   city: String,
@@ -8,4 +8,4 @@ const rateSchema = new mongoose.Schema({
   dollar: String
 });
 
-export default mongoose.model('Rate', rateSchema);
+module.exports = mongoose.model('Rate', rateSchema);
