@@ -1,5 +1,5 @@
-import express from 'express';
-import Rate from '../models/Rate.js';
+const express = require('express');
+const Rate = require('../models/Rate');
 
 const router = express.Router();
 
@@ -34,5 +34,4 @@ router.delete('/', async (req, res) => {
   res.json({ message: 'All rates deleted' });
 });
 
-
-export default router;
+module.exports = router;
